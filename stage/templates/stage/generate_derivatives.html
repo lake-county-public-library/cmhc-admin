@@ -1,13 +1,57 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+{% if data %}
+{% for status in data %}
+<script>
+function loadDoc() {
+  
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+     document.getElementById("log").innerHTML = xhttp.responseText;
+    }
+  };
+  xhttp.open("GET", "{% url 'stage:derivative_logs' status.id %}", true);
+  xhttp.send();
+}
+
+window.onload = function() {
+  loadDoc();
+}
+</script>
+{% endfor %}
+{% endif %}
+</head>
+
+<body>
 <h1>Generating Derivatives</h1>
+
+{% if msg %}
+<p>"{{ msg }}"</p>
+{% endif %}
+
 {% if data %}
 <ul>
   {% for status in data %}
-  <form action="{% url 'stage:csv' status.id %}" method="post">
-{% csrf_token %}
-<input type="submit" value="Stage CSV">
-</form>
+    <form action="{% url 'stage:csv' status.id %}" method="post">
+  {% csrf_token %}
+      <input type="submit" value="Stage CSV">
+    </form>
   {% endfor %}
 </ul>
 {% else %}
   <p>No workflow status</p>
 {% endif %}
+
+<h2>Derivative status</h2>
+<ul>
+  <div id="log">
+  </div>
+<button type="button" onclick="loadDoc()">Refresh</button>
+</ul>
+
+{% include "stage/footer.html" %}
+</body>
+</html>
