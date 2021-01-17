@@ -1,0 +1,15 @@
+<h1>Dashboard</h1>
+
+{% if data %}
+<ul>
+  {% for status in data %}
+    <li><a href="{{ status.id }}/">{{ status }}</a></li>
+  {% endfor %}
+</ul>
+
+{% endif %}
+
+<form action="{% url 'stage:workflow' %}" method="post">
+{% csrf_token %}
+  <input type="submit" value="Start Workflow">
+</form>

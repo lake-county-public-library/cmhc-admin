@@ -1,0 +1,25 @@
+<h1>Workflow</h1>
+{% if data %}
+{% for status in data %}
+<ul>
+  <form action="{% url 'stage:csv' status.id %}" method="post">
+{% csrf_token %}
+<input type="submit" value="Stage CSV">
+</form>
+</ul>
+<ul>
+  <form action="{% url 'stage:images' status.id %}" method="post">
+{% csrf_token %}
+<input type="submit" value="Stage Images">
+</form>
+</ul>
+<ul>
+  <form action="{% url 'stage:derivatives' status.id %}" method="post">
+{% csrf_token %}
+<input type="submit" value="Generate Derivatives">
+</form>
+</ul>
+{% endfor %}
+{% else %}
+  <p>No workflow status</p>
+{% endif %}

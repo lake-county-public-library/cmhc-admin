@@ -1,0 +1,13 @@
+<h1>Generating Derivatives</h1>
+{% if data %}
+<ul>
+  {% for status in data %}
+  <form action="{% url 'stage:csv' status.id %}" method="post">
+{% csrf_token %}
+<input type="submit" value="Stage CSV">
+</form>
+  {% endfor %}
+</ul>
+{% else %}
+  <p>No workflow status</p>
+{% endif %}
