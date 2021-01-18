@@ -1,10 +1,9 @@
-<h1>Workflow</h1>
-{% if data %}
-{% for status in data %}
+<h1>Workflow - {{ status.id }}</h1>
 <ul>
   <form action="{% url 'stage:csv' status.id %}" method="post">
 {% csrf_token %}
 <input type="submit" value="Stage CSV">
+{{ csv_form }}
 </form>
 </ul>
 <ul>
@@ -19,10 +18,6 @@
 <input type="submit" value="Generate Derivatives">
 </form>
 </ul>
-{% endfor %}
-{% else %}
-  <p>No workflow status</p>
-{% endif %}
 
 {% include "stage/footer.html" %}
 

@@ -1,16 +1,21 @@
-<h1>Staging CSV</h1>
-{% if data %}
-<ul>
-  {% for status in data %}
-  <form action="{% url 'stage:csv' status.id %}" method="post">
-{% csrf_token %}
-<input type="submit" value="Stage CSV">
-</form>
-  {% endfor %}
-</ul>
+<h1>Staging CSV - {{ status_id }}</h1>
+{% if error_msg %}
+  {{ error_msg }}
+  <ul>
+  <form action="{% url 'stage:workflow' status_id %}" method="get">
+  <input type="submit" value="workflow">
+  </ul>
+
 {% else %}
-  <p>No workflow status</p>
+  <ul>
+    Successfully staged: {{ filename }}
+  </ul>
+
+  <ul>
+    <form action="{% url 'stage:workflow' status_id %}" method="get">
+    <input type="submit" value="workflow">
+  </ul>
+
 {% endif %}
 
-{% include "stage/footer.html" %}
 

@@ -17,14 +17,26 @@ from .config import (
 )
 
 class Stager():
-  def stage_csv():
+  def stage_csv(filename):
+    local_file = local_file_directory + "/" + filename
     remote = RemoteClient(host, user, ssh_key_filepath, remote_path)
-    upload_files_to_remote(remote)
-    remote.disconnect()
-    return "success"
+
+    try:
+      upload_single_file_to_remote(remote, local_file)
+    except FileNotFoundError as error:
+      raise error
+    except Exception as e:
+      raise e
+    finally:
+      remote.disconnect()
 
   def stage_images():
     return "success"
+
+def upload_single_file_to_remote(remote, local_file):
+  """Upload single file to remote via SCP."""
+  remote.upload_single_file(local_file)
+    
 
 def upload_files_to_remote(remote):
   """Upload files to remote via SCP."""

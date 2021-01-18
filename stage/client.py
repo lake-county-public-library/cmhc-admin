@@ -1,6 +1,7 @@
 """Client to handle connections and actions executed against a remote host."""
 
-from os import system
+import errno
+from os import system, path, strerror
 from paramiko import SSHClient, AutoAddPolicy, RSAKey
 from paramiko.auth_handler import AuthenticationException, SSHException
 from scp import SCPClient, SCPException
@@ -85,8 +86,13 @@ class RemoteClient:
     uploads = [self._upload_single_file(file) for file in files]
     logger.info(f'Finished uploading {len(uploads)} files to {self.remote_path} on {self.host}')
 
-  def _upload_single_file(self, file):
+  def upload_single_file(self, file):
+    """Verify file exists"""
+    if not path.isfile(file):
+      raise FileNotFoundError(errno.ENOENT, strerror(errno.ENOENT), file)
+
     """Upload a single file to a remote directory."""
+    self.conn = self._connect()
     upload = None
     try:
       self.scp.put(
@@ -95,11 +101,14 @@ class RemoteClient:
         remote_path=self.remote_path
       )
       upload = file
+      logger.info(f'Uploaded {file} to {self.remote_path}')
     except SCPException as error:
       logger.error(error)
       raise error
-    finally:
-      logger.info(f'Uploaded {file} to {self.remote_path}')
+    except Exception as e:
+      logger.error(e)
+      raise e
+    else:
       return upload
 
   def download_file(self, file):
