@@ -2,9 +2,10 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.template import loader
 from django.utils import timezone
+from threading import Thread
 
 from .models import Status
-from .services import Stager, Generator
+from .services import Stager, Generator, LogFinder
 
 def index(request):
   template = loader.get_template('stage/index.html')
@@ -32,8 +33,19 @@ def stage_images(request, status_id):
 
 def generate_derivatives(request, status_id):
   template = loader.get_template('stage/generate_derivatives.html')
-  result = Generator.generate_derivatives()
-  return HttpResponse("You're generating derivatives: %s - %s" % (status_id, result))
+  output = f"logs/stage/derivatives-{status_id}.txt"
+  t = Thread(target=Generator.generate_derivatives, args=(output,))
+  t.start()
+  
+  status = Status.objects.get(pk=status_id)
+  context = {'msg' : f"You're generating derivatives: {status_id}",
+             'out' : f"stage/derivatives-{status_id}.txt", 
+             'data': [status]}
+  return HttpResponse(template.render(context, request))
+
+def derivative_logs(request, status_id):
+  data = LogFinder.find(f"logs/stage/derivatives-{status_id}.txt")  
+  return HttpResponse(data) 
 
 def rebuild_local_site(request, status_id):
     return HttpResponse("You're rebuilding local site: %s." % status_id)
