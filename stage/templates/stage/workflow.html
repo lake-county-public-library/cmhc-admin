@@ -7,6 +7,13 @@
 {% csrf_token %}
 <input type="submit" value="Stage CSV">
 {{ csv_form }}
+{% if status.csv_staged %}
+<span class="checkmark">
+    <div class="checkmark_circle"></div>
+    <div class="checkmark_stem"></div>
+    <div class="checkmark_kick"></div>
+</span>
+{% endif %}
 </form>
 </ul>
 
@@ -14,18 +21,26 @@
   <form action="{% url 'stage:images' status.id %}" method="post">
 {% csrf_token %}
   <input type="submit" value="Stage Images">
+{% if status.images_staged %}
+<span class="checkmark">
+    <div class="checkmark_circle"></div>
+    <div class="checkmark_stem"></div>
+    <div class="checkmark_kick"></div>
+</span>
+{% endif %}
 </form>
 </ul>
 
 <ul>
   <form action="{% url 'stage:derivatives' status.id %}" method="post">
 {% csrf_token %}
-{% if status.derivatives_generated == True %}
-  <input type="submit" value="Generate Derivatives" disabled>
-{% elif not status.csv_staged or not status.images_staged %}
-  <input type="submit" value="Generate Derivatives" disabled>
-{% else %}
   <input type="submit" value="Generate Derivatives">
+{% if status.derivatives_generated %}
+<span class="checkmark">
+    <div class="checkmark_circle"></div>
+    <div class="checkmark_stem"></div>
+    <div class="checkmark_kick"></div>
+</span>
 {% endif %}
 </form>
 </ul>
@@ -34,6 +49,13 @@
   <form action="{% url 'stage:pages' status.id %}" method="post">
 {% csrf_token %}
   <input type="submit" value="Generate Pages">
+{% if status.pages_generated %}
+<span class="checkmark">
+    <div class="checkmark_circle"></div>
+    <div class="checkmark_stem"></div>
+    <div class="checkmark_kick"></div>
+</span>
+{% endif %}
 </form>
 </ul>
 
@@ -41,6 +63,13 @@
   <form action="{% url 'stage:index' status.id %}" method="post">
 {% csrf_token %}
   <input type="submit" value="Generate Index">
+{% if status.indexes_rebuilt %}
+<span class="checkmark">
+    <div class="checkmark_circle"></div>
+    <div class="checkmark_stem"></div>
+    <div class="checkmark_kick"></div>
+</span>
+{% endif %}
 </form>
 </ul>
 
@@ -48,13 +77,24 @@
   <form action="{% url 'stage:run' status.id %}" method="post">
 {% csrf_token %}
   <input type="submit" value="Run local site">
+{% if status.deploy_local %}
+<span class="checkmark">
+    <div class="checkmark_circle"></div>
+    <div class="checkmark_stem"></div>
+    <div class="checkmark_kick"></div>
+</span>
+{% endif %}
 </form>
 </ul>
 
 <ul>
   <form action="{% url 'stage:kill' status.id %}" method="post">
 {% csrf_token %}
+{% if status.deploy_local %}
   <input type="submit" value="Stop local site">
+{% else %}
+  <input type="submit" value="Stop local site" disabled>
+{% endif %}
 </form>
 </ul>
 
@@ -62,6 +102,13 @@
   <form action="{% url 'stage:deploy' status.id %}" method="post">
 {% csrf_token %}
   <input type="submit" value="Deploy!">
+{% if status.deploy_aws %}
+<span class="checkmark">
+    <div class="checkmark_circle"></div>
+    <div class="checkmark_stem"></div>
+    <div class="checkmark_kick"></div>
+</span>
+{% endif %}
 </form>
 </ul>
 

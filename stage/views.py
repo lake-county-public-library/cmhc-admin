@@ -102,6 +102,11 @@ def generate_derivatives(request, status_id):
   t.start()
   
   status = Status.objects.get(pk=status_id)
+
+  # Update status
+  status.derivatives_generated = True
+  status.save()
+
   dt = dateformat.format(timezone.now(), 'Y-m-d H:i:s') 
   context = {'msg' : f"Derivative generation initiated: %s" %dt,
              'out' : f"stage/derivatives-{status_id}.txt", 
@@ -154,6 +159,11 @@ def generate_pages(request, status_id):
   t.start()
   
   status = Status.objects.get(pk=status_id)
+
+  # Update status
+  status.pages_generated = True
+  status.save()
+
   dt = dateformat.format(timezone.now(), 'Y-m-d H:i:s') 
   context = {'msg' : f"Page generation initiated: %s" %dt,
              'out' : f"stage/pages-{status_id}.txt", 
@@ -169,6 +179,11 @@ def generate_index(request, status_id):
   t.start()
   
   status = Status.objects.get(pk=status_id)
+
+  # Update status
+  status.indexes_rebuilt = True
+  status.save()
+
   dt = dateformat.format(timezone.now(), 'Y-m-d H:i:s') 
   context = {'msg' : f"Index generation initiated: %s" %dt,
              'out' : f"stage/index-{status_id}.txt", 
@@ -184,6 +199,11 @@ def run_local_site(request, status_id):
   t.start()
 
   status = Status.objects.get(pk=status_id)
+
+  # Update status
+  status.deploy_local = True
+  status.save()
+
   dt = dateformat.format(timezone.now(), 'Y-m-d H:i:s')
   context = {'msg' : f"Local site initiated: %s" %dt,
              'out' : f"stage/run-{status_id}.txt",
@@ -213,6 +233,11 @@ def deploy(request, status_id):
   t.start()
 
   status = Status.objects.get(pk=status_id)
+
+  # Update status
+  status.deploy_aws = True
+  status.save()
+
   dt = dateformat.format(timezone.now(), 'Y-m-d H:i:s')
   context = {'msg' : f"Deploying to AWS: %s" %dt,
              'out' : f"stage/deploy-{status_id}.txt",

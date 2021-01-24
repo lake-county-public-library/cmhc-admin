@@ -5,6 +5,7 @@ class Status(models.Model):
   csv_staged = models.BooleanField(default=False)
   images_staged = models.BooleanField(default=False)
   derivatives_generated = models.BooleanField(default=False)
+  pages_generated = models.BooleanField(default=False)
   indexes_rebuilt = models.BooleanField(default=False)
   deploy_aws = models.BooleanField(default=False)
   deploy_local = models.BooleanField(default=False)
