@@ -20,5 +20,5 @@ urlpatterns = [
     path('<int:status_id>/run_logs', views.run_local_logs, name='run_logs'),
     path('<int:status_id>/kill', views.kill_local_site, name='kill'),
     path('<int:status_id>/deploy', views.deploy, name='deploy'),
-    path('<int:status_id>/rebuild', views.rebuild_local_site, name='rebuild'),
+    path('<int:status_id>/deploy_logs', views.deploy_logs, name='deploy_logs'),
 ]

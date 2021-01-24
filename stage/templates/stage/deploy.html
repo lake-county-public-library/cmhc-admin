@@ -3,7 +3,6 @@
 
 <head>
 {% include "stage/common.html" %}
-
 <script>
 function loadDoc() {
   
@@ -13,7 +12,7 @@ function loadDoc() {
      document.getElementById("log").innerHTML = xhttp.responseText;
     }
   };
-  xhttp.open("GET", "{% url 'stage:pages_logs' status.id %}", true);
+  xhttp.open("GET", "{% url 'stage:deploy_logs' status.id %}", true);
   xhttp.send();
 }
 
@@ -24,13 +23,13 @@ window.onload = function() {
 </head>
 
 <body>
-<h1>Generating Pages - {{ status.id }}</h1>
+<h1>Deploying to AWS - {{ status.id }}</h1>
 
 {% if msg %}
 <ul>{{ msg }}</ul>
 {% endif %}
 
-<h2>Page generation status</h2>
+<h2>Deploy status</h2>
 <ul>
   <div id="log">
   </div>

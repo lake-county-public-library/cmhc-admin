@@ -7,7 +7,7 @@ from threading import Thread
 
 from .models import Status
 from .forms import CsvForm
-from .services import Stager, WaxHelperThread, WaxHelper, LogFinder
+from .services import Stager, WaxHelper, LogFinder
 
 def index(request):
   """
@@ -112,7 +112,8 @@ def generate_derivatives(request, status_id):
 def derivative_logs(request, status_id):
   """
   """
-  data = LogFinder.find(f"logs/stage/derivatives-{status_id}.txt")  
+  data = LogFinder.find(f"logs/stage/derivatives-{status_id}.txt",
+                        "TIFFFetchNormalTag")
   return HttpResponse(data) 
 
 def images_logs(request, status_id):
@@ -138,6 +139,12 @@ def run_local_logs(request, status_id):
   """
   data = LogFinder.find(f"logs/stage/run-{status_id}.txt")  
   return HttpResponse(data) 
+
+def deploy_logs(request, status_id):
+  """
+  """
+  data = LogFinder.find(f"logs/stage/deploy-{status_id}.txt")
+  return HttpResponse(data)
 
 def generate_pages(request, status_id):
   """
@@ -174,14 +181,12 @@ def run_local_site(request, status_id):
   """
   output = f"logs/stage/run-{status_id}.txt"
   t = Thread(target=WaxHelper.run_local, args=(output,))
-#  t = WaxHelperThread()
-#  t.run_local(output)
   t.start()
 
   status = Status.objects.get(pk=status_id)
   dt = dateformat.format(timezone.now(), 'Y-m-d H:i:s')
   context = {'msg' : f"Local site initiated: %s" %dt,
-             'out' : f"stage/index-{status_id}.txt",
+             'out' : f"stage/run-{status_id}.txt",
              'status': status}
   template = loader.get_template('stage/run_local.html')
   return HttpResponse(template.render(context, request))
@@ -199,17 +204,18 @@ def kill_local_site(request, status_id):
   template = loader.get_template('stage/kill_local.html')
   return HttpResponse(template.render(context, request))
 
-  
-
-
-
-def rebuild_local_site(request, status_id):
-  """
-  """
-  return HttpResponse("You're rebuilding local site: %s." % status_id)
-
 
 def deploy(request, status_id):
   """
   """
-  return HttpResponse("You're deploying site to AWS: %s." % status_id)
+  output = f"logs/stage/deploy-{status_id}.txt"
+  t = Thread(target=WaxHelper.deploy, args=(output,))
+  t.start()
+
+  status = Status.objects.get(pk=status_id)
+  dt = dateformat.format(timezone.now(), 'Y-m-d H:i:s')
+  context = {'msg' : f"Deploying to AWS: %s" %dt,
+             'out' : f"stage/deploy-{status_id}.txt",
+             'status': status}
+  template = loader.get_template('stage/deploy.html')
+  return HttpResponse(template.render(context, request))

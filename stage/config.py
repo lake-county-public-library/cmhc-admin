@@ -10,10 +10,9 @@ load_dotenv(path.join(basedir, '.env'))
 host = environ.get('REMOTE_HOST')
 user = environ.get('REMOTE_USERNAME')
 ssh_key_filepath = environ.get('SSH_KEY')
-remote_path = environ.get('REMOTE_PATH')
-remote_images_path = environ.get('REMOTE_IMAGES_PATH')
 wax_home = environ.get('WAX_HOME')
 wax_host_ip = environ.get('WAX_HOST_IP')
-
-local_file_directory = 'data'
-local_images_directory = 'data/images'
+local_csv_directory = environ.get('LOCAL_CSV_DIRECTORY')
+local_images_directory = environ.get('LOCAL_IMAGES_DIRECTORY')
+remote_csv_directory = environ.get('REMOTE_CSV_DIRECTORY')
+remote_images_directory = environ.get('REMOTE_IMAGES_DIRECTORY')
