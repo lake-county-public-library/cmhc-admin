@@ -1,15 +1,17 @@
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
-from django.utils import timezone
+from django.utils import timezone, dateformat
 from django.urls import reverse
 from threading import Thread
 
 from .models import Status
 from .forms import CsvForm
-from .services import Stager, Generator, LogFinder
+from .services import Stager, WaxHelperThread, WaxHelper, LogFinder
 
 def index(request):
+  """
+  """
   if request.method == 'POST':
     status = Status.objects.create(date=timezone.now())
     status.save()
@@ -21,6 +23,8 @@ def index(request):
     return HttpResponse(template.render(context, request))
 
 def workflow(request, status_id):
+  """
+  """
   template = loader.get_template('stage/workflow.html')
   status = Status.objects.get(pk=status_id)
 
@@ -31,25 +35,37 @@ def workflow(request, status_id):
   return HttpResponse(template.render(context, request))
 
 def detail(request, status_id):
+  """
+  """
   return HttpResponse("You're looking at question %s." % status_id)
 
 def stage_csv(request, status_id):
+  """
+  """
+  status = Status.objects.get(pk=status_id)
+
   if request.method == 'POST':
     form = CsvForm(request.POST)
     if form.is_valid():
       filename = form.cleaned_data['csv_filename']
       try:
-        Stager.stage_csv(form.cleaned_data['csv_filename'])
-        # TODO: Change status on successful staging
+        output = f"logs/stage/csv-{status_id}.txt"
+        Stager.stage_csv(form.cleaned_data['csv_filename'], output)
+
       except Exception as e:
         return render(request, 'stage/stage_csv.html', {
           'error_msg': str(e),
-          'status_id': status_id
+          'status': status
         })
 
+      # Update status
+      status.csv_staged = True
+      status.save()
+
       template = loader.get_template('stage/stage_csv.html')
-      context = {'status_id': status_id,
-                 'filename' : filename}
+      context = {'status': status,
+                 'filename' : filename,
+                 'csv_staged': status.csv_staged}
       return HttpResponse(template.render(context, request))
 
   else:
@@ -58,29 +74,142 @@ def stage_csv(request, status_id):
   return render(request, 'stage/stage_csv.html', {'form': form})
 
 def stage_images(request, status_id):
-    return HttpResponse("You're staging images: %s." % status_id)
+  """
+  """
+  status = Status.objects.get(pk=status_id)
+ 
+  output = f"logs/stage/images-{status_id}.txt"
+  t = Thread(target=Stager.stage_images, args=(output,))
+  t.start()
+    
+  # Update status
+  status.images_staged = True
+  status.save()
+
+  dt = dateformat.format(timezone.now(), 'Y-m-d H:i:s') 
+  context = {'msg' : f"Image staging initiated: %s" %dt,
+             'out' : f"stage/images-{status_id}.txt", 
+             'status': status}
+  template = loader.get_template('stage/stage_images.html')
+  return HttpResponse(template.render(context, request))
+
 
 def generate_derivatives(request, status_id):
-  template = loader.get_template('stage/generate_derivatives.html')
+  """
+  """
   output = f"logs/stage/derivatives-{status_id}.txt"
-  t = Thread(target=Generator.generate_derivatives, args=(output,))
+  t = Thread(target=WaxHelper.generate_derivatives, args=(output,))
   t.start()
   
   status = Status.objects.get(pk=status_id)
-  context = {'msg' : f"You're generating derivatives: {status_id}",
+  dt = dateformat.format(timezone.now(), 'Y-m-d H:i:s') 
+  context = {'msg' : f"Derivative generation initiated: %s" %dt,
              'out' : f"stage/derivatives-{status_id}.txt", 
-             'data': [status]}
+             'status': status}
+  template = loader.get_template('stage/generate_derivatives.html')
   return HttpResponse(template.render(context, request))
 
 def derivative_logs(request, status_id):
+  """
+  """
   data = LogFinder.find(f"logs/stage/derivatives-{status_id}.txt")  
   return HttpResponse(data) 
 
-def rebuild_local_site(request, status_id):
-    return HttpResponse("You're rebuilding local site: %s." % status_id)
+def images_logs(request, status_id):
+  """
+  """
+  data = LogFinder.find(f"logs/stage/images-{status_id}.txt")  
+  return HttpResponse(data) 
+
+def pages_logs(request, status_id):
+  """
+  """
+  data = LogFinder.find(f"logs/stage/pages-{status_id}.txt")  
+  return HttpResponse(data) 
+
+def index_logs(request, status_id):
+  """
+  """
+  data = LogFinder.find(f"logs/stage/index-{status_id}.txt")  
+  return HttpResponse(data) 
+
+def run_local_logs(request, status_id):
+  """
+  """
+  data = LogFinder.find(f"logs/stage/run-{status_id}.txt")  
+  return HttpResponse(data) 
+
+def generate_pages(request, status_id):
+  """
+  """
+  output = f"logs/stage/pages-{status_id}.txt"
+  t = Thread(target=WaxHelper.generate_pages, args=(output,))
+  t.start()
+  
+  status = Status.objects.get(pk=status_id)
+  dt = dateformat.format(timezone.now(), 'Y-m-d H:i:s') 
+  context = {'msg' : f"Page generation initiated: %s" %dt,
+             'out' : f"stage/pages-{status_id}.txt", 
+             'status': status}
+  template = loader.get_template('stage/generate_pages.html')
+  return HttpResponse(template.render(context, request))
+
+def generate_index(request, status_id):
+  """
+  """
+  output = f"logs/stage/index-{status_id}.txt"
+  t = Thread(target=WaxHelper.generate_index, args=(output,))
+  t.start()
+  
+  status = Status.objects.get(pk=status_id)
+  dt = dateformat.format(timezone.now(), 'Y-m-d H:i:s') 
+  context = {'msg' : f"Index generation initiated: %s" %dt,
+             'out' : f"stage/index-{status_id}.txt", 
+             'status': status}
+  template = loader.get_template('stage/generate_index.html')
+  return HttpResponse(template.render(context, request))
 
 def run_local_site(request, status_id):
-    return HttpResponse("You're running local site: %s." % status_id)
+  """
+  """
+  output = f"logs/stage/run-{status_id}.txt"
+  t = Thread(target=WaxHelper.run_local, args=(output,))
+#  t = WaxHelperThread()
+#  t.run_local(output)
+  t.start()
+
+  status = Status.objects.get(pk=status_id)
+  dt = dateformat.format(timezone.now(), 'Y-m-d H:i:s')
+  context = {'msg' : f"Local site initiated: %s" %dt,
+             'out' : f"stage/index-{status_id}.txt",
+             'status': status}
+  template = loader.get_template('stage/run_local.html')
+  return HttpResponse(template.render(context, request))
+
+  
+def kill_local_site(request, status_id):
+  """
+  """
+  WaxHelper.kill_local()
+
+  status = Status.objects.get(pk=status_id)
+  dt = dateformat.format(timezone.now(), 'Y-m-d H:i:s')
+  context = {'msg' : f"Local site stopped: %s" %dt,
+             'status': status}
+  template = loader.get_template('stage/kill_local.html')
+  return HttpResponse(template.render(context, request))
+
+  
+
+
+
+def rebuild_local_site(request, status_id):
+  """
+  """
+  return HttpResponse("You're rebuilding local site: %s." % status_id)
+
 
 def deploy(request, status_id):
-    return HttpResponse("You're deploying site to AWS: %s." % status_id)
+  """
+  """
+  return HttpResponse("You're deploying site to AWS: %s." % status_id)

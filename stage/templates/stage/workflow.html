@@ -6,16 +6,52 @@
 {{ csv_form }}
 </form>
 </ul>
+
 <ul>
   <form action="{% url 'stage:images' status.id %}" method="post">
 {% csrf_token %}
-<input type="submit" value="Stage Images">
+  <input type="submit" value="Stage Images">
 </form>
 </ul>
+
 <ul>
   <form action="{% url 'stage:derivatives' status.id %}" method="post">
 {% csrf_token %}
-<input type="submit" value="Generate Derivatives">
+{% if status.derivatives_generated == True %}
+  <input type="submit" value="Generate Derivatives" disabled>
+{% elif not status.csv_staged or not status.images_staged %}
+  <input type="submit" value="Generate Derivatives" disabled>
+{% else %}
+  <input type="submit" value="Generate Derivatives">
+{% endif %}
+</form>
+</ul>
+
+<ul>
+  <form action="{% url 'stage:pages' status.id %}" method="post">
+{% csrf_token %}
+  <input type="submit" value="Generate Pages">
+</form>
+</ul>
+
+<ul>
+  <form action="{% url 'stage:index' status.id %}" method="post">
+{% csrf_token %}
+  <input type="submit" value="Generate Index">
+</form>
+</ul>
+
+<ul>
+  <form action="{% url 'stage:run' status.id %}" method="post">
+{% csrf_token %}
+  <input type="submit" value="Run local site">
+</form>
+</ul>
+
+<ul>
+  <form action="{% url 'stage:kill' status.id %}" method="post">
+{% csrf_token %}
+  <input type="submit" value="Stop local site">
 </form>
 </ul>
 

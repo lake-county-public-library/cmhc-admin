@@ -75,18 +75,26 @@ class RemoteClient:
       self.scp.close()
 
   @logger.catch
-  def bulk_upload(self, files):
+  def bulk_upload(self, files, out):
     """
     Upload multiple files to a remote directory.
 
     :param files: List of paths to local files.
     :type files: List[str]
     """
-    self.conn = self._connect()
-    uploads = [self._upload_single_file(file) for file in files]
-    logger.info(f'Finished uploading {len(uploads)} files to {self.remote_path} on {self.host}')
 
-  def upload_single_file(self, file):
+    # Ensure valid input
+    if files is None:
+      print("Error: Arg 'files' is null in RemoteClient.bulk_upload ")
+      return
+
+    self.conn = self._connect()
+    uploads = [self.upload_single_file(file, out) for file in files]
+    logger.info(f'Finished uploading {len(uploads)} files to {self.remote_path} on {self.host}')
+    out.write(f'<p>Finished uploading {len(uploads)} files to {self.remote_path} on {self.host}</p>')
+
+
+  def upload_single_file(self, file, out):
     """Verify file exists"""
     if not path.isfile(file):
       raise FileNotFoundError(errno.ENOENT, strerror(errno.ENOENT), file)
@@ -102,6 +110,8 @@ class RemoteClient:
       )
       upload = file
       logger.info(f'Uploaded {file} to {self.remote_path}')
+      out.write(f'Uploaded {file} to {self.remote_path}<br>')
+      out.flush()
     except SCPException as error:
       logger.error(error)
       raise error

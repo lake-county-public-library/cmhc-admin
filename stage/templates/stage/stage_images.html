@@ -11,7 +11,7 @@ function loadDoc() {
      document.getElementById("log").innerHTML = xhttp.responseText;
     }
   };
-  xhttp.open("GET", "{% url 'stage:derivative_logs' status.id %}", true);
+  xhttp.open("GET", "{% url 'stage:images_logs' status.id %}", true);
   xhttp.send();
 }
 
@@ -22,19 +22,30 @@ window.onload = function() {
 </head>
 
 <body>
-<h1>Generating Derivatives - {{ status.id }}</h1>
+<h1>Staging Images - {{ status.id }}</h1>
 
-{% if msg %}
-<ul>{{ msg }}</ul>
-{% endif %}
+{% if error_msg %}
+  {{ error_msg }}
+  <ul>
+  <form action="{% url 'stage:workflow' status.id %}" method="get">
+  <input type="submit" value="workflow">
+  </ul>
 
-<h2>Derivative status</h2>
+{% else %}
+
+  {% if msg %}
+  <ul>{{ msg }}</ul>
+  {% endif %}
+
+<h2>Staging status</h2>
 <ul>
   <div id="log">
   </div>
 <p/>
 <button type="button" onclick="loadDoc()">Refresh</button>
 </ul>
+
+{% endif %}
 
 {% include "stage/footer_workflow.html" %}
 </body>

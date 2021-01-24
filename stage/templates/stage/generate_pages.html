@@ -11,7 +11,7 @@ function loadDoc() {
      document.getElementById("log").innerHTML = xhttp.responseText;
     }
   };
-  xhttp.open("GET", "{% url 'stage:derivative_logs' status.id %}", true);
+  xhttp.open("GET", "{% url 'stage:pages_logs' status.id %}", true);
   xhttp.send();
 }
 
@@ -22,13 +22,13 @@ window.onload = function() {
 </head>
 
 <body>
-<h1>Generating Derivatives - {{ status.id }}</h1>
+<h1>Generating Pages - {{ status.id }}</h1>
 
 {% if msg %}
 <ul>{{ msg }}</ul>
 {% endif %}
 
-<h2>Derivative status</h2>
+<h2>Page generation status</h2>
 <ul>
   <div id="log">
   </div>
