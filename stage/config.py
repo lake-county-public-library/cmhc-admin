@@ -9,6 +9,7 @@ load_dotenv(path.join(basedir, '.env'))
 # Read environment variables
 host = environ.get('REMOTE_HOST')
 user = environ.get('REMOTE_USERNAME')
+password = environ.get('REMOTE_PASSWORD')
 ssh_key_filepath = environ.get('SSH_KEY')
 wax_home = environ.get('WAX_HOME')
 wax_host_ip = environ.get('WAX_HOST_IP')

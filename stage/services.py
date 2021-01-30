@@ -13,6 +13,7 @@ from .client import RemoteClient
 from .config import (
   host,
   user,
+  password,
   ssh_key_filepath,
   local_csv_directory,
   local_images_directory,
@@ -27,12 +28,13 @@ class Stager():
   def stage_csv(filename, logfile):
     """
     """
+    remote_file = remote_csv_directory + "/" + filename
     local_file = local_csv_directory + "/" + filename
-    remote = RemoteClient(host, user, ssh_key_filepath, remote_csv_directory)
+    remote = RemoteClient(host, user, password, ssh_key_filepath)
 
     try:
       out = open(logfile, 'w')
-      upload_single_file_to_remote(remote, local_file, out)
+      download_single_file_from_remote(remote, remote_file, local_file, out)
     except FileNotFoundError as error:
       raise error
     except Exception as e:
@@ -52,9 +54,9 @@ class Stager():
       out.write(f"Error: %s is not a valid directory!" %local_images_directory)
       return
 
-    remote = RemoteClient(host, user, ssh_key_filepath, remote_images_directory)
+    remote = RemoteClient(host, user, password, ssh_key_filepath)
     try:
-      upload_files_to_remote(remote, local_images_directory, out)
+      download_files_from_remote(remote, remote_images_directory, local_images_directory, out)
     except FileNotFoundError as error:
       raise error
     except Exception as e:
@@ -64,16 +66,26 @@ class Stager():
       out.close()
 
 
+def download_single_file_from_remote(remote, remote_file, local_file, out):
+  """Download single file from remote via SCP."""
+  remote.download_single_file(remote_file, local_file, out)
+    
+def download_files_from_remote(remote, remote_directory, local_directory, out):
+  """Download files from remote via SCP."""
+  remote.bulk_download(remote_directory, local_directory, out)
+
+
+
 
 def upload_single_file_to_remote(remote, local_file, out):
   """Upload single file to remote via SCP."""
-  remote.upload_single_file(local_file, out)
+  remote.upload_single_file(local_file, remote_file, out)
     
 
-def upload_files_to_remote(remote, local_directory, out):
+def upload_files_to_remote(remote, local_directory, remote_directory, out):
   """Upload files to remote via SCP."""
   local_files = fetch_local_files(local_directory)
-  remote.bulk_upload(local_files, out)
+  remote.bulk_upload(local_files, remote_directory, out)
 
 
 class WaxHelper():
