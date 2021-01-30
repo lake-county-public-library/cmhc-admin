@@ -76,18 +76,6 @@ def download_files_from_remote(remote, remote_directory, local_directory, out):
 
 
 
-
-def upload_single_file_to_remote(remote, local_file, out):
-  """Upload single file to remote via SCP."""
-  remote.upload_single_file(local_file, remote_file, out)
-    
-
-def upload_files_to_remote(remote, local_directory, remote_directory, out):
-  """Upload files to remote via SCP."""
-  local_files = fetch_local_files(local_directory)
-  remote.bulk_upload(local_files, remote_directory, out)
-
-
 class WaxHelper():
 
   p = None
