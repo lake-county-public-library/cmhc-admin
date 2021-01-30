@@ -218,6 +218,11 @@ def kill_local_site(request, status_id):
   WaxHelper.kill_local()
 
   status = Status.objects.get(pk=status_id)
+
+  # Update status
+  status.kill_local = True
+  status.save()
+
   dt = dateformat.format(timezone.now(), 'Y-m-d H:i:s')
   context = {'msg' : f"Local site stopped: %s" %dt,
              'status': status}

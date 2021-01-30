@@ -9,6 +9,7 @@ class Status(models.Model):
   indexes_rebuilt = models.BooleanField(default=False)
   deploy_aws = models.BooleanField(default=False)
   deploy_local = models.BooleanField(default=False)
+  kill_local = models.BooleanField(default=False)
 
   def __str__(self):
     return "(%i): %s" %(self.id, self.date.strftime("%Y-%m-%d %H:%M:%S"))

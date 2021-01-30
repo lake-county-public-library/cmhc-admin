@@ -95,13 +95,25 @@
 {% else %}
   <input type="submit" value="Stop local site" disabled>
 {% endif %}
+
+{% if status.kill_local %}
+<span class="checkmark">
+    <div class="checkmark_circle"></div>
+    <div class="checkmark_stem"></div>
+    <div class="checkmark_kick"></div>
+</span>
+{% endif %}
 </form>
 </ul>
 
 <ul>
   <form action="{% url 'stage:deploy' status.id %}" method="post">
 {% csrf_token %}
+{% if status.kill_local %}
   <input type="submit" value="Deploy!">
+{% else %}
+  <input type="submit" value="Deploy!" disabled>
+{% endif %}
 {% if status.deploy_aws %}
 <span class="checkmark">
     <div class="checkmark_circle"></div>
