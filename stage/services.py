@@ -36,6 +36,7 @@ class Stager():
       out = open(logfile, 'w')
       download_single_file_from_remote(remote, remote_file, local_file, out)
     except FileNotFoundError as error:
+      print(f"services: error - %s" %str(error))
       raise error
     except Exception as e:
       raise e

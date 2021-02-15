@@ -25,7 +25,7 @@ SECRET_KEY = 'q#s9^1f37d#g*xe+(vjfj!6*api%8g0j+af@t%(j%!7$_f=q_b'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['10.214.255.248', 'localhost', '127.0.0.1', '192.168.0.136']
+ALLOWED_HOSTS = ['10.214.255.248', 'localhost', '127.0.0.1', '192.168.0.136', 'orange']
 
 
 # Application definition
@@ -119,3 +119,29 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = '/var/www/lcpl/static/'
+
+# Logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'debug_file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': '/opt/cmhc-admin/logs/debug.log',
+        },
+        'error_file': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': '/opt/cmhc-admin/logs/sys-err.log',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['debug_file', 'error_file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}

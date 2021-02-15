@@ -4,6 +4,7 @@ from django.template import loader
 from django.utils import timezone, dateformat
 from django.urls import reverse
 from threading import Thread
+from pathlib import Path
 
 from .models import Status
 from .forms import CsvForm
@@ -39,6 +40,13 @@ def detail(request, status_id):
   """
   return HttpResponse("You're looking at question %s." % status_id)
 
+def output_file_path(status_id, phase):
+  """ 
+  """ 
+  BASE_DIR = Path(__file__).resolve().parent.parent
+  return f"%s/logs/stage/{status_id}-{phase}.txt" %str(BASE_DIR)
+
+
 def stage_csv(request, status_id):
   """
   """
@@ -49,7 +57,7 @@ def stage_csv(request, status_id):
     if form.is_valid():
       filename = form.cleaned_data['csv_filename']
       try:
-        output = f"logs/stage/csv-{status_id}.txt"
+        output = output_file_path(status_id, "csv")
         Stager.stage_csv(form.cleaned_data['csv_filename'], output)
 
       except Exception as e:
@@ -78,7 +86,7 @@ def stage_images(request, status_id):
   """
   status = Status.objects.get(pk=status_id)
  
-  output = f"logs/stage/images-{status_id}.txt"
+  output = output_file_path(status_id, "images")
   t = Thread(target=Stager.stage_images, args=(output,))
   t.start()
     
@@ -97,7 +105,7 @@ def stage_images(request, status_id):
 def generate_derivatives(request, status_id):
   """
   """
-  output = f"logs/stage/derivatives-{status_id}.txt"
+  output = output_file_path(status_id, "derivatives")
   t = Thread(target=WaxHelper.generate_derivatives, args=(output,))
   t.start()
   
@@ -117,44 +125,49 @@ def generate_derivatives(request, status_id):
 def derivative_logs(request, status_id):
   """
   """
-  data = LogFinder.find(f"logs/stage/derivatives-{status_id}.txt",
-                        "TIFFFetchNormalTag")
+  log = output_file_path(status_id, "derivatives")
+  data = LogFinder.find(log, "TIFFFetchNormalTag")
   return HttpResponse(data) 
 
 def images_logs(request, status_id):
   """
   """
-  data = LogFinder.find(f"logs/stage/images-{status_id}.txt")  
+  log = output_file_path(status_id, "images")
+  data = LogFinder.find(log)  
   return HttpResponse(data) 
 
 def pages_logs(request, status_id):
   """
   """
-  data = LogFinder.find(f"logs/stage/pages-{status_id}.txt")  
+  log = output_file_path(status_id, "pages")
+  data = LogFinder.find(log)  
   return HttpResponse(data) 
 
 def index_logs(request, status_id):
   """
   """
-  data = LogFinder.find(f"logs/stage/index-{status_id}.txt")  
+  log = output_file_path(status_id, "index")
+  data = LogFinder.find(log)  
   return HttpResponse(data) 
 
 def run_local_logs(request, status_id):
   """
   """
-  data = LogFinder.find(f"logs/stage/run-{status_id}.txt")  
+  log = output_file_path(status_id, "run")
+  data = LogFinder.find(log)  
   return HttpResponse(data) 
 
 def deploy_logs(request, status_id):
   """
   """
-  data = LogFinder.find(f"logs/stage/deploy-{status_id}.txt")
+  log = output_file_path(status_id, "deploy")
+  data = LogFinder.find(log)
   return HttpResponse(data)
 
 def generate_pages(request, status_id):
   """
   """
-  output = f"logs/stage/pages-{status_id}.txt"
+  output = output_file_path(status_id, "pages")
   t = Thread(target=WaxHelper.generate_pages, args=(output,))
   t.start()
   
@@ -174,7 +187,7 @@ def generate_pages(request, status_id):
 def generate_index(request, status_id):
   """
   """
-  output = f"logs/stage/index-{status_id}.txt"
+  output = output_file_path(status_id, "index")
   t = Thread(target=WaxHelper.generate_index, args=(output,))
   t.start()
   
@@ -194,7 +207,7 @@ def generate_index(request, status_id):
 def run_local_site(request, status_id):
   """
   """
-  output = f"logs/stage/run-{status_id}.txt"
+  output = output_file_path(status_id, "run")
   t = Thread(target=WaxHelper.run_local, args=(output,))
   t.start()
 
@@ -233,7 +246,7 @@ def kill_local_site(request, status_id):
 def deploy(request, status_id):
   """
   """
-  output = f"logs/stage/deploy-{status_id}.txt"
+  output = output_file_path(status_id, "deploy")
   t = Thread(target=WaxHelper.deploy, args=(output,))
   t.start()
 

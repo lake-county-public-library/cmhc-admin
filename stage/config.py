@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 
 # Load environment variables from .env
 basedir = path.abspath(path.dirname(__file__))
+print(f"config: basedir = %s" %str(basedir))
 load_dotenv(path.join(basedir, '.env'))
 
 # Read environment variables

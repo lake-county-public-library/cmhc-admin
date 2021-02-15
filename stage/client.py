@@ -2,6 +2,7 @@
 
 import errno
 import re
+import traceback
 from os import system, path, strerror
 from paramiko import SSHClient, AutoAddPolicy, RSAKey
 from paramiko.auth_handler import AuthenticationException, SSHException
@@ -107,10 +108,10 @@ class RemoteClient:
       out.write(f'Finished download of {remote_file}<br>')
       out.flush()
     except SCPException as error:
-      logger.error(error)
+      logger.error(f"client: SCPException! %s" %traceback.format_exc())
       raise error
     except Exception as e:
-      logger.error(e)
+      logger.error(f"client: Exception! %s" %traceback.format_exc())
       raise e
     else:
       return download
@@ -135,10 +136,14 @@ class RemoteClient:
     self.conn = self._connect()
 
     # Ensure Windows formatting of directory path
-    windows_dir = remote_directory.replace("/", "\\")
+    # - assuming paths that start with '/' are not Windows
+    if not remote_directory.startswith("/"):
+      windows_dir = remote_directory.replace("/", "\\")
+      stdin, stdout, stderr = self.conn.exec_command(f"dir {windows_dir}")
+    else:
+      stdin, stdout, stderr = self.conn.exec_command(f"ls {remote_directory}")
 
     # Find the listing of images on the remote machine
-    stdin, stdout, stderr = self.conn.exec_command(f"dir {windows_dir}")
     stdout = stdout.readlines()
     stderr = stderr.readlines()
 
